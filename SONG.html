@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
@@ -16,11 +15,9 @@
         .btn-add { background-color: #27ae60; color: white; }
         .btn-add:disabled { background-color: #95a5a6; cursor: not-allowed; }
         .btn-export { background-color: #2980b9; color: white; }
-        /* 刪除按鈕樣式 */
         .btn-delete { background-color: #e74c3c; color: white; padding: 6px 10px; font-size: 0.9em; border-radius: 4px; cursor: pointer; border: none; }
         .btn-delete:hover { background-color: #c0392b; }
         .btn-delete:disabled { background-color: #f5b7b1; cursor: not-allowed; }
-        
         .search-bar { width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #3498db; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
         .publisher-group { margin-bottom: 30px; border: 1px solid #e1e8ed; border-radius: 6px; overflow: hidden; }
         .publisher-title { background-color: #34495e; color: white; padding: 10px 15px; margin: 0; font-size: 1.2em; }
@@ -51,15 +48,13 @@
 </div>
 
 <script>
-    // 已經替換為你最新提供的 API 網址
+    // 🚨 這是你最新的 API 網址。如果你重新部署了 Apps Script，請務必更新這裡！
     const API_URL = https://script.google.com/macros/s/AKfycbxLNIX5-v2gyojTBAylf93lMpOxBM4B2G2xw5CG8ZfhHLw9YViVRE6W5y211u--N4H9/exec
     let records = [];
 
-    // 載入資料
     async function loadRecords() {
         const container = document.getElementById('resultsContainer');
         container.innerHTML = '<p style="text-align:center; color:#2980b9;">⏳ 正在從雲端載入資料，請稍候...</p>';
-        
         try {
             const response = await fetch(API_URL);
             records = await response.json();
@@ -70,7 +65,6 @@
         }
     }
 
-    // 新增記錄
     async function addRecord() {
         const publisher = document.getElementById('publisher').value.trim();
         const bookName = document.getElementById('bookName').value.trim();
@@ -85,7 +79,6 @@
         }
 
         const newRecord = { action: 'add', publisher, bookName, songNameZh, songNameEn, composer };
-        
         btn.textContent = '⏳ 儲存中...';
         btn.disabled = true;
 
@@ -96,8 +89,6 @@
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }
             });
             const result = await response.json();
-
-            // 將新產生的 ID 放進本地陣列中
             newRecord.id = result.id;
             records.push(newRecord);
             
@@ -118,12 +109,10 @@
         }
     }
 
-    // 刪除記錄功能
     async function deleteRecord(id, btnElement) {
         if (!confirm("⚠️ 確定要刪除這筆記錄嗎？(此動作無法復原)")) {
-            return; // 使用者按取消就停止
+            return; 
         }
-
         btnElement.textContent = '⏳ 刪除中...';
         btnElement.disabled = true;
 
@@ -133,13 +122,8 @@
                 body: JSON.stringify({ action: 'delete', id: id }),
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }
             });
-
-            // 從本地陣列中移除該筆資料
             records = records.filter(record => record.id !== id);
-            
-            // 重新渲染畫面
             renderRecords();
-            
         } catch (error) {
             console.error('刪除失敗:', error);
             alert("❌ 刪除失敗，請檢查網路。");
@@ -148,7 +132,6 @@
         }
     }
 
-    // 排序與渲染
     function customSort(a, b) {
         const strA = a || '';
         const strB = b || '';
@@ -201,7 +184,6 @@
             });
 
             const table = document.createElement('table');
-            // 表頭加入「操作」欄位
             table.innerHTML = `
                 <thead>
                     <tr>
@@ -231,13 +213,11 @@
         });
     }
 
-    // 匯出至 EXCEL 功能 (不包含 ID)
     function exportToExcel() {
         if (records.length === 0) {
             alert("沒有資料可以匯出！");
             return;
         }
-
         const worksheet = XLSX.utils.json_to_sheet(records.map(r => ({
             "出版社 (Publisher)": r.publisher,
             "書名 (Book Name)": r.bookName,
@@ -245,7 +225,6 @@
             "英文歌名 (English Song)": r.songNameEn,
             "作曲家 (Composer)": r.composer
         })));
-
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "出版記錄");
         XLSX.writeFile(workbook, "出版物記錄.xlsx");
@@ -253,6 +232,5 @@
 
     window.onload = loadRecords;
 </script>
-
 </body>
 </html>
